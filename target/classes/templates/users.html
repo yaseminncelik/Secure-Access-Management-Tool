@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Secure Access Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar h2 {
+            font-size: 24px;
+        }
+        
+        .navbar-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .navbar-actions button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .navbar-actions button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 32px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            color: #555;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        tbody tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-admin {
+            background: #ffe5cc;
+            color: #cc6600;
+        }
+        
+        .badge-user {
+            background: #e5f2ff;
+            color: #0066cc;
+        }
+        
+        .badge-active {
+            background: #e5ffe5;
+            color: #00cc00;
+        }
+        
+        .badge-inactive {
+            background: #ffe5e5;
+            color: #cc0000;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .btn-edit {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-sm:hover {
+            opacity: 0.8;
+        }
+        
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>🔐 Secure Access Management</h2>
+        <div class="navbar-actions">
+            <span id="currentUser"></span>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Users</h1>
+            <button class="btn-primary" onclick="openAddUserForm()">+ Add New User</button>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Add/Edit User Modal -->
+    <div id="userModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="background: white; width: 90%; max-width: 500px; margin: 50px auto; padding: 30px; border-radius: 10px;">
+            <h2 id="modalTitle">Add New User</h2>
+            <form id="userForm" style="margin-top: 20px;">
+                <div style="margin-bottom: 15px;">
+                    <label>Username</label>
+                    <input type="text" id="formUsername" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label>Email</label>
+                    <input type="email" id="formEmail" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label>Password</label>
+                    <input type="password" id="formPassword" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label>Role</label>
+                    <select id="formRole" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                        <option value="USER">USER</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn-primary" style="flex: 1;">Save</button>
+                    <button type="button" class="btn-primary" style="flex: 1; background: #999;" onclick="closeUserModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        let currentUserId = null;
+        let isEditMode = false;
+        
+        // Load users on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers();
+            const user = JSON.parse(sessionStorage.getItem('currentUser'));
+            if (user) {
+                document.getElementById('currentUser').textContent = `Welcome, ${user.username}`;
+            } else {
+                window.location.href = '/login';
+            }
+        });
+        
+        function loadUsers() {
+            fetch('/api/users')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('usersTableBody');
+                    tbody.innerHTML = '';
+                    
+                    if (data.data && data.data.length > 0) {
+                        data.data.forEach(user => {
+                            const row = document.createElement('tr');
+                            const createdDate = new Date(user.createdAt).toLocaleDateString();
+                            
+                            row.innerHTML = `
+                                <td>${user.id}</td>
+                                <td>${user.username}</td>
+                                <td>${user.email}</td>
+                                <td><span class="badge badge-${user.role.toLowerCase()}">${user.role}</span></td>
+                                <td><span class="badge badge-${user.isActive ? 'active' : 'inactive'}">${user.isActive ? 'Active' : 'Inactive'}</span></td>
+                                <td>${createdDate}</td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="btn-sm btn-edit" onclick="editUser(${user.id})">Edit</button>
+                                        <button class="btn-sm btn-delete" onclick="deleteUser(${user.id})">Delete</button>
+                                    </div>
+                                </td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="7" class="empty-message">No users found</td></tr>';
+                    }
+                });
+        }
+        
+        function openAddUserForm() {
+            isEditMode = false;
+            currentUserId = null;
+            document.getElementById('modalTitle').textContent = 'Add New User';
+            document.getElementById('userForm').reset();
+            document.getElementById('formPassword').style.display = 'block';
+            document.getElementById('userModal').style.display = 'block';
+        }
+        
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+        
+        function editUser(id) {
+            fetch(`/api/users/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    const user = data.data;
+                    isEditMode = true;
+                    currentUserId = id;
+                    document.getElementById('modalTitle').textContent = 'Edit User';
+                    document.getElementById('formUsername').value = user.username;
+                    document.getElementById('formEmail').value = user.email;
+                    document.getElementById('formRole').value = user.role;
+                    document.getElementById('formPassword').value = '';
+                    document.getElementById('userModal').style.display = 'block';
+                });
+        }
+        
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userData = {
+                username: document.getElementById('formUsername').value,
+                email: document.getElementById('formEmail').value,
+                password: document.getElementById('formPassword').value,
+                role: document.getElementById('formRole').value
+            };
+            
+            const url = isEditMode ? `/api/users/${currentUserId}` : '/api/users';
+            const method = isEditMode ? 'PUT' : 'POST';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                if (response.ok) {
+                    closeUserModal();
+                    loadUsers();
+                } else {
+                    alert('Error saving user');
+                }
+            } catch (error) {
+                alert('An error occurred: ' + error);
+            }
+        });
+        
+        function deleteUser(id) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                fetch(`/api/users/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        loadUsers();
+                    } else {
+                        alert('Error deleting user');
+                    }
+                });
+            }
+        }
+        
+        function logout() {
+            sessionStorage.removeItem('currentUser');
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>
