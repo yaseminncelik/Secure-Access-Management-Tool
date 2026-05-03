@@ -2,7 +2,6 @@ package com.secureaccess.service;
 
 import com.secureaccess.dto.URLWhitelistRequestDTO;
 import com.secureaccess.dto.URLWhitelistResponseDTO;
-import com.secureaccess.entity.URLWhitelist;
 import com.secureaccess.entity.User;
 
 import java.util.List;

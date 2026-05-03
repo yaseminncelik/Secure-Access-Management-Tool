@@ -71,7 +71,7 @@ public class JwtTokenProvider {
             throw new RuntimeException("JWT token desteklenmiyor", e);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("JWT token boş", e);
-        } catch (SignatureException e) {
+        } catch (io.jsonwebtoken.security.SignatureException e) {
             throw new RuntimeException("JWT token imzası doğrulanamadı", e);
         }
     }

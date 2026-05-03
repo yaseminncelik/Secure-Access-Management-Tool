@@ -43,4 +43,8 @@ public class DashboardController {
     public String editUserPage() {
         return "user-form";
     }
+    @GetMapping("/firewall-test")
+    public String firewallTestPage() {
+        return "firewall-test";
+    }
 }

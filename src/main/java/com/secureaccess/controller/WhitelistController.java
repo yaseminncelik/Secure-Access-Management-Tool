@@ -1,5 +1,4 @@
 package com.secureaccess.controller;
-
 import com.secureaccess.dto.URLWhitelistRequestDTO;
 import com.secureaccess.dto.URLWhitelistResponseDTO;
 import com.secureaccess.entity.Role;
@@ -66,7 +65,7 @@ public class WhitelistController {
             @RequestHeader("Authorization") String authHeader) {
 
         try {
-            User user = getUserFromToken(authHeader);
+            getUserFromToken(authHeader); // Sadece token doğrulaması için çağırıyoruz
             whitelistService.removeWhitelistUrl(whitelistId);
 
             Map<String, String> response = new HashMap<>();

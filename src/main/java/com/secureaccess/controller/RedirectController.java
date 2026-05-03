@@ -6,15 +6,10 @@ import com.secureaccess.entity.AccessStatus;
 import com.secureaccess.entity.User;
 import com.secureaccess.security.JwtAuthenticationProvider;
 import com.secureaccess.service.AccessLogService;
-import com.secureaccess.service.URLWhitelistService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
-
 import jakarta.servlet.http.HttpServletRequest;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 
 /**
  * RedirectController - Firewall/Redirect servisi
@@ -27,14 +22,11 @@ public class RedirectController {
 
     private final JwtAuthenticationProvider authProvider;
     private final AccessLogService accessLogService;
-    private final URLWhitelistService whitelistService;
 
     public RedirectController(JwtAuthenticationProvider authProvider,
-            AccessLogService accessLogService,
-            URLWhitelistService whitelistService) {
+            AccessLogService accessLogService) {
         this.authProvider = authProvider;
         this.accessLogService = accessLogService;
-        this.whitelistService = whitelistService;
     }
 
     /**
