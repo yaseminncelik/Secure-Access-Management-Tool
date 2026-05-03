@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.lang.NonNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +44,7 @@ public class UserController {
      * GET /users/{id}
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getUserById(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> getUserById(@PathVariable @NonNull Long id) {
         UserResponseDTO user = userService.getUserById(id);
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -72,7 +73,7 @@ public class UserController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> updateUser(
-            @PathVariable Long id,
+            @PathVariable @NonNull Long id,
             @Valid @RequestBody UserRequestDTO requestDTO) {
         UserResponseDTO user = userService.updateUser(id, requestDTO);
         Map<String, Object> response = new HashMap<>();
@@ -87,7 +88,7 @@ public class UserController {
      * DELETE /users/{id}
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable @NonNull Long id) {
         userService.deleteUser(id);
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);

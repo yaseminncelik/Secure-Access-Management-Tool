@@ -375,6 +375,48 @@
         </div>
     </div>
     
+    <!-- Whitelist Modal -->
+    <div id="whitelistModal" class="modal-overlay">
+        <div class="modal" style="max-width: 600px;">
+            <h2 style="margin-bottom: 1rem;">Manage URLs for <span id="wlUsername" style="color:var(--accent-color)"></span></h2>
+            <div style="max-height: 200px; overflow-y: auto; margin-bottom: 1.5rem; background: rgba(0,0,0,0.2); border-radius: 6px; padding: 1rem;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th style="padding:0.5rem;text-align:left">URL</th>
+                            <th style="padding:0.5rem;text-align:left">Method</th>
+                            <th style="padding:0.5rem;text-align:center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="wlTableBody"></tbody>
+                </table>
+            </div>
+            <form id="wlForm">
+                <div class="form-group">
+                    <label>New URL</label>
+                    <input type="url" id="wlUrl" placeholder="https://api.example.com/data" required>
+                </div>
+                <div style="display:flex; gap:1rem;">
+                    <div class="form-group" style="flex:1;">
+                        <label>Method</label>
+                        <select id="wlMethod">
+                            <option value="GET">GET</option><option value="POST">POST</option>
+                            <option value="PUT">PUT</option><option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex:2;">
+                        <label>Description</label>
+                        <input type="text" id="wlDesc" placeholder="e.g. Read Data API" required>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeWhitelistModal()">Close</button>
+                    <button type="submit" class="btn-save">Add URL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <script>
         let currentUserId = null;
         let isEditMode = false;
@@ -382,6 +424,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             const user = JSON.parse(sessionStorage.getItem('currentUser'));
             if (user) {
+                if (user.role !== 'ADMIN') {
+                    window.location.href = '/my-access';
+                    return;
+                }
                 document.getElementById('usernameDisplay').textContent = user.username;
                 loadUsers();
             } else {
@@ -425,6 +471,9 @@
                                 <td>${createdDate}</td>
                                 <td>
                                     <div class="actions" style="justify-content:flex-end">
+                                        <button class="btn-action" style="color:var(--success-text);border-color:rgba(16,185,129,0.3)" onclick="openWhitelistModal(${user.id}, '${user.username}')" title="Manage URLs">
+                                            <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                                        </button>
                                         <button class="btn-action edit" onclick="editUser(${user.id})" title="Edit">
                                             <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                         </button>
@@ -539,6 +588,90 @@
             sessionStorage.removeItem('token');
             window.location.href = '/login';
         }
+
+        // --- Whitelist Logic ---
+        let currentWlUserId = null;
+        
+        function openWhitelistModal(userId, username) {
+            currentWlUserId = userId;
+            document.getElementById('wlUsername').textContent = username;
+            document.getElementById('wlForm').reset();
+            document.getElementById('whitelistModal').style.display = 'flex';
+            loadWhitelistsForUser(userId);
+        }
+
+        function closeWhitelistModal() {
+            document.getElementById('whitelistModal').style.display = 'none';
+        }
+
+        function loadWhitelistsForUser(userId) {
+            const headers = {};
+            const token = sessionStorage.getItem('token');
+            if (token) headers['Authorization'] = token.startsWith('Bearer ') ? token : 'Bearer ' + token;
+
+            fetch(`/api/whitelist/admin/user/${userId}`, { headers })
+                .then(r => r.json())
+                .then(urls => {
+                    const tbody = document.getElementById('wlTableBody');
+                    tbody.innerHTML = '';
+                    if(urls && urls.length > 0) {
+                        urls.forEach(u => {
+                            tbody.innerHTML += `<tr>
+                                <td style="padding: 0.5rem; border-bottom: 1px solid var(--border-color); font-family:monospace;">${u.url}</td>
+                                <td style="padding: 0.5rem; border-bottom: 1px solid var(--border-color);"><span class="badge badge-active">${u.httpMethod}</span></td>
+                                <td style="padding: 0.5rem; border-bottom: 1px solid var(--border-color); text-align:center;">
+                                    <button type="button" class="btn-action delete" style="padding:0.2rem; display:inline-flex;" onclick="deleteWhitelist(${u.id}, ${userId})" title="Delete URL">
+                                        <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    </button>
+                                </td>
+                            </tr>`;
+                        });
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:1rem;color:var(--text-secondary)">No URLs found for this user.</td></tr>';
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('wlTableBody').innerHTML = '<tr><td colspan="3" style="text-align:center;padding:1rem;color:var(--error-text)">Failed to load URLs (Admin access required).</td></tr>';
+                });
+        }
+
+        function deleteWhitelist(wlId, userId) {
+            if(!confirm('Delete this URL rule?')) return;
+            const headers = {};
+            const token = sessionStorage.getItem('token');
+            if (token) headers['Authorization'] = token.startsWith('Bearer ') ? token : 'Bearer ' + token;
+            
+            fetch(`/api/whitelist/${wlId}`, { method: 'DELETE', headers })
+                .then(r => {
+                    if(r.ok) loadWhitelistsForUser(userId);
+                    else alert('Failed to delete URL');
+                });
+        }
+
+        document.getElementById('wlForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                url: document.getElementById('wlUrl').value,
+                httpMethod: document.getElementById('wlMethod').value,
+                description: document.getElementById('wlDesc').value
+            };
+            const headers = { 'Content-Type': 'application/json' };
+            const token = sessionStorage.getItem('token');
+            if (token) headers['Authorization'] = token.startsWith('Bearer ') ? token : 'Bearer ' + token;
+
+            const res = await fetch(`/api/whitelist/admin/add/${currentWlUserId}`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(data)
+            });
+            if(res.ok) {
+                document.getElementById('wlForm').reset();
+                loadWhitelistsForUser(currentWlUserId);
+            } else {
+                alert('Failed to add URL');
+            }
+        });
     </script>
 </body>
 </html>

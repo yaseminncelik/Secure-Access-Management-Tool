@@ -3,6 +3,7 @@ package com.secureaccess.service;
 import com.secureaccess.dto.LoginRequestDTO;
 import com.secureaccess.dto.UserRequestDTO;
 import com.secureaccess.dto.UserResponseDTO;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public interface UserService {
     /**
      * ID'ye göre kullanıcı getir
      */
-    UserResponseDTO getUserById(Long id);
+    UserResponseDTO getUserById(@NonNull Long id);
     
     /**
      * Yeni kullanıcı oluştur
@@ -30,12 +31,12 @@ public interface UserService {
     /**
      * Kullanıcı güncelle
      */
-    UserResponseDTO updateUser(Long id, UserRequestDTO requestDTO);
+    UserResponseDTO updateUser(@NonNull Long id, UserRequestDTO requestDTO);
     
     /**
      * Kullanıcı sil
      */
-    void deleteUser(Long id);
+    void deleteUser(@NonNull Long id);
     
     /**
      * Login işlemi

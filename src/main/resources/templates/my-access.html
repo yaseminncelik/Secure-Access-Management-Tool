@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Access - Secure Access Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --success-text: #34d399;
+            --error-text: #f87171;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .navbar {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            z-index: 100;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        #currentUser {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-text);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover { background: rgba(239, 68, 68, 0.2); }
+
+        .main-wrapper {
+            margin-top: 100px;
+            width: 100%;
+            max-width: 1100px;
+            padding: 2rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .app-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .app-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+        }
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .app-card:hover::before { opacity: 1; }
+
+        .app-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-color);
+        }
+
+        .app-info h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .app-info p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .app-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            flex-grow: 1;
+        }
+
+        .launch-btn {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .launch-btn:hover {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+
+        .launch-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px dashed var(--border-color);
+        }
+
+        .empty-state svg {
+            width: 48px; height: 48px;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2 style="font-size:1.2rem;display:flex;align-items:center;gap:8px;">
+            <svg style="width:20px;height:20px;color:var(--accent-color)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Secure Access
+        </h2>
+        <div class="user-actions">
+            <div id="currentUser">
+                <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span id="usernameDisplay">Loading...</span>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <div class="main-wrapper">
+        <div class="header">
+            <h1>My Applications</h1>
+            <p>Select an application to securely access it through the firewall.</p>
+        </div>
+
+        <div class="apps-grid" id="appsContainer">
+            <!-- Populated via JS -->
+            <div class="empty-state" style="display:none;" id="loadingState">
+                Loading your applications...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = JSON.parse(sessionStorage.getItem('currentUser'));
+            if (!user) {
+                window.location.href = '/login';
+                return;
+            }
+            document.getElementById('usernameDisplay').textContent = user.username;
+            loadMyApps();
+        });
+
+        function loadMyApps() {
+            const container = document.getElementById('appsContainer');
+            container.innerHTML = '<div class="empty-state">Loading your applications...</div>';
+
+            const headers = {};
+            const token = sessionStorage.getItem('token');
+            if (token) headers['Authorization'] = token.startsWith('Bearer ') ? token : 'Bearer ' + token;
+
+            fetch('/api/whitelist/my-urls', { headers })
+                .then(res => {
+                    if (res.status === 401 || res.status === 403) {
+                        logout();
+                        throw new Error('Unauthorized');
+                    }
+                    return res.json();
+                })
+                .then(urls => {
+                    container.innerHTML = '';
+                    if (urls && urls.length > 0) {
+                        urls.forEach(u => {
+                            const card = document.createElement('div');
+                            card.className = 'app-card';
+                            card.innerHTML = `
+                                <div style="display:flex; gap:1rem; align-items:center;">
+                                    <div class="app-icon">
+                                        <svg style="width:24px;height:24px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                                    </div>
+                                    <div class="app-info">
+                                        <h3>${u.description || 'Secure App'}</h3>
+                                        <p>${u.url}</p>
+                                    </div>
+                                </div>
+                                <button class="launch-btn" onclick="launchApp('${u.url}', '${u.httpMethod}', this)">
+                                    Launch App
+                                    <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                </button>
+                            `;
+                            container.appendChild(card);
+                        });
+                    } else {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                <h3>No Applications Found</h3>
+                                <p style="color:var(--text-secondary);margin-top:0.5rem;">You don't have access to any applications yet. Contact your administrator.</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    container.innerHTML = '<div class="empty-state" style="color:var(--error-text)">Failed to load applications.</div>';
+                });
+        }
+
+        async function launchApp(url, method, btnElement) {
+            const originalText = btnElement.innerHTML;
+            btnElement.innerHTML = 'Connecting...';
+            btnElement.classList.add('loading');
+
+            const token = sessionStorage.getItem('token');
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': token.startsWith('Bearer ') ? token : 'Bearer ' + token
+            };
+
+            try {
+                const response = await fetch('/api/redirect/url', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ targetUrl: url, httpMethod: method || 'GET' })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.redirectUrl) {
+                    window.open(data.redirectUrl, '_blank');
+                } else {
+                    alert('Access Denied: ' + (data.message || 'Firewall blocked the request'));
+                }
+            } catch (error) {
+                alert('Connection Error');
+            } finally {
+                btnElement.innerHTML = originalText;
+                btnElement.classList.remove('loading');
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('currentUser');
+            sessionStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>

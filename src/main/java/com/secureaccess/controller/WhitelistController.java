@@ -61,7 +61,7 @@ public class WhitelistController {
      */
     @DeleteMapping("/{whitelistId}")
     public ResponseEntity<?> removeWhitelistUrl(
-            @PathVariable Long whitelistId,
+            @PathVariable @org.springframework.lang.NonNull Long whitelistId,
             @RequestHeader("Authorization") String authHeader) {
 
         try {
@@ -119,6 +119,49 @@ public class WhitelistController {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
+    /**
+     * Belirli bir kullanıcının URL'lerini getir (Admin only)
+     */
+    @GetMapping("/admin/user/{userId}")
+    public ResponseEntity<?> getWhitelistUrlsForUser(
+            @PathVariable @org.springframework.lang.NonNull Long userId,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            User adminUser = getUserFromToken(authHeader);
+            if (!adminUser.getRole().equals(Role.ADMIN)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Admin yetkisi gereklidir"));
+            }
+            User targetUser = userRepository.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException("Kullanıcı bulunamadı"));
+            List<URLWhitelistResponseDTO> urls = whitelistService.getWhitelistUrls(targetUser);
+            return ResponseEntity.ok(urls);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Belirli bir kullanıcıya whitelist ekle (Admin only)
+     */
+    @PostMapping("/admin/add/{userId}")
+    public ResponseEntity<?> addWhitelistUrlForUser(
+            @PathVariable @org.springframework.lang.NonNull Long userId,
+            @RequestBody URLWhitelistRequestDTO requestDTO,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            User adminUser = getUserFromToken(authHeader);
+            if (!adminUser.getRole().equals(Role.ADMIN)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Admin yetkisi gereklidir"));
+            }
+            User targetUser = userRepository.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException("Kullanıcı bulunamadı"));
+            URLWhitelistResponseDTO response = whitelistService.addWhitelistUrl(targetUser, requestDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
 

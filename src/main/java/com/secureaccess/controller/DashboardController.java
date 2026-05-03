@@ -47,4 +47,9 @@ public class DashboardController {
     public String firewallTestPage() {
         return "firewall-test";
     }
+
+    @GetMapping("/my-access")
+    public String myAccessPage() {
+        return "my-access";
+    }
 }

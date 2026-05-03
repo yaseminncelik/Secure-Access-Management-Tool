@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.lang.NonNull;
 
 /**
  * URLWhitelistServiceImpl - URL whitelist işlemleri implementation
@@ -42,7 +43,7 @@ public class URLWhitelistServiceImpl implements URLWhitelistService {
     }
 
     @Override
-    public void removeWhitelistUrl(Long whitelistId) {
+    public void removeWhitelistUrl(@NonNull Long whitelistId) {
         whitelistRepository.deleteById(whitelistId);
     }
 

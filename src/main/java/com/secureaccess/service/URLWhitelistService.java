@@ -5,6 +5,7 @@ import com.secureaccess.dto.URLWhitelistResponseDTO;
 import com.secureaccess.entity.User;
 
 import java.util.List;
+import org.springframework.lang.NonNull;
 
 /**
  * URLWhitelistService Interface - URL whitelist işlemleri
@@ -20,7 +21,7 @@ public interface URLWhitelistService {
     /**
      * Whitelist URL'ini sil
      */
-    void removeWhitelistUrl(Long whitelistId);
+    void removeWhitelistUrl(@NonNull Long whitelistId);
 
     /**
      * Belirli bir kullanıcının whitelist URL'lerini getir

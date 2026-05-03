@@ -166,8 +166,8 @@
         
         <form id="loginForm">
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
+                <label for="username">Email / Admin Username</label>
+                <input type="text" id="username" name="username" placeholder="kullanici@domain.com veya admin" required>
             </div>
             
             <div class="form-group">
@@ -217,7 +217,11 @@
                         sessionStorage.setItem('token', data.token);
                     }
                     setTimeout(() => {
-                        window.location.href = '/users';
+                        if (data.user.role === 'ADMIN') {
+                            window.location.href = '/users';
+                        } else {
+                            window.location.href = '/my-access';
+                        }
                     }, 1000);
                 } else {
                     errorDiv.textContent = data.message || 'Login failed';
