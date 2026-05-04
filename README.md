@@ -22,3 +22,13 @@ Kod içerisinde aşağıdaki temel prensipler vurgulanmıştır:
 - **Abstraction (Soyutlama):** Service katmanında Interface kullanımıyla iş mantığının gizlenmesi.
 - **Polymorphism (Çok Biçimlilik):** Interface implementasyonları ve metot ezme (override) işlemleri.
 - **Inheritance (Kalıtım):** Ortak özelliklerin (id, tarih vb.) Base sınıflardan aktarılması.
+
+## Nasıl Çalıştırılır?
+1.  **Gereksinimler:** Bilgisayarınızda Java 17+ ve Maven kurulu olmalıdır.
+2.  **Projeyi İndirin:** `git clone` komutuyla veya ZIP olarak projeyi bilgisayarınıza indirin.
+3.  **Çalıştırın:** Terminal üzerinden proje dizinine gidin ve şu komutu çalıştırın:
+    ```bash
+    mvn spring-boot:run
+    ```
+4.  **Arayüze Erişin:** Tarayıcınızdan [http://localhost:8080/login](http://localhost:8080/login) adresine giderek sistemi kullanmaya başlayabilirsiniz.
+5.  **Veritabanı:** Bellek içi (H2) veritabanı kullanıldığı için uygulama kapandığında veriler sıfırlanır. Başlangıçta örnek kullanıcılar (`admin`, `user1` vb.) otomatik olarak oluşturulur.
