@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Secure Access Management</title>
+    <title>Register - Secure Access Management</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -36,7 +36,7 @@
             padding: 2rem;
         }
 
-        .login-container {
+        .register-container {
             background: var(--card-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -45,7 +45,7 @@
             border-radius: 16px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             width: 100%;
-            max-width: 420px;
+            max-width: 480px;
             animation: fadeIn 0.6s ease-out;
         }
 
@@ -65,11 +65,9 @@
             gap: 10px;
         }
 
-        h1 svg {
-            color: var(--accent-color);
-        }
+        h1 svg { color: var(--accent-color); }
 
-        .form-group { margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1.25rem; }
 
         label {
             display: block;
@@ -124,37 +122,33 @@
             display: none;
             font-size: 0.9rem;
             text-align: center;
-            animation: slideDown 0.3s ease-out;
         }
 
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .error-message { background: var(--error-bg); color: var(--error-text); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .success-message { background: var(--success-bg); color: var(--success-text); border: 1px solid rgba(16, 185, 129, 0.2); }
 
-        .error-message {
-            background: var(--error-bg);
-            color: var(--error-text);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        .success-message {
-            background: var(--success-bg);
-            color: var(--success-text);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        .info-text {
+        .footer-text {
             text-align: center;
             color: var(--text-secondary);
-            margin-top: 2rem;
+            margin-top: 1.5rem;
             font-size: 0.85rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-text a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .password-requirements {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            padding-left: 0.5rem;
         }
 
         @media (max-width: 480px) {
-            .login-container {
+            .register-container {
                 padding: 1.5rem;
                 margin: 1rem;
             }
@@ -163,83 +157,102 @@
     </style>
 </head>
 <body>
-    <div class="login-container">
+    <div class="register-container">
         <h1>
-            <svg style="width:28px;height:28px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            Secure Access
+            <svg style="width:28px;height:28px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+            Create Account
         </h1>
         
         <div id="errorMessage" class="error-message"></div>
         <div id="successMessage" class="success-message"></div>
         
-        <form id="loginForm">
+        <form id="registerForm">
             <div class="form-group">
-                <label for="username">Email / Admin Username</label>
-                <input type="text" id="username" name="username" placeholder="kullanici@domain.com veya admin" required>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="johndoe" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="john@example.com" required>
             </div>
             
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required>
+                <div class="password-requirements">
+                    At least 8 chars, one uppercase, one lowercase, one number, and one special char.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
             </div>
             
-            <button type="submit">Sign In</button>
+            <button type="submit">Register Now</button>
         </form>
-
-        <div class="info-text">
-            Don't have an account? <a href="/register" style="color: var(--accent-color); text-decoration: none; font-weight: 600;">Register Now</a>
+        
+        <div class="footer-text">
+            Already have an account? <a href="/login">Sign In</a>
         </div>
     </div>
     
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
             const btn = e.target.querySelector('button');
             const errorDiv = document.getElementById('errorMessage');
             const successDiv = document.getElementById('successMessage');
             
-            btn.innerHTML = 'Signing in...';
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            btn.innerHTML = 'Creating account...';
             btn.disabled = true;
             errorDiv.style.display = 'none';
             successDiv.style.display = 'none';
             
             try {
-                const response = await fetch('/api/auth/login', {
+                // Bizim mevcut API'mizi kullanarak USER rolünde kullanıcı oluşturuyoruz
+                const response = await fetch('/api/users', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ 
+                        username, 
+                        email, 
+                        password, 
+                        role: 'USER' // Public kayıtlar her zaman USER rolünde olur
+                    })
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    successDiv.textContent = 'Login successful! Redirecting...';
+                    successDiv.textContent = 'Registration successful! Redirecting to login...';
                     successDiv.style.display = 'block';
-                    sessionStorage.setItem('currentUser', JSON.stringify(data.user));
-                    // Check if token exists in response, and store it if we have it
-                    if (data.token) {
-                        sessionStorage.setItem('token', data.token);
-                    }
                     setTimeout(() => {
-                        if (data.user.role === 'ADMIN') {
-                            window.location.href = '/users';
-                        } else {
-                            window.location.href = '/my-access';
-                        }
-                    }, 1000);
+                        window.location.href = '/login';
+                    }, 2000);
                 } else {
-                    errorDiv.textContent = data.message || 'Login failed';
+                    errorDiv.textContent = data.message || 'Registration failed';
                     errorDiv.style.display = 'block';
-                    btn.innerHTML = 'Sign In';
+                    btn.innerHTML = 'Register Now';
                     btn.disabled = false;
                 }
             } catch (error) {
                 errorDiv.textContent = 'Connection error occurred';
                 errorDiv.style.display = 'block';
-                btn.innerHTML = 'Sign In';
+                btn.innerHTML = 'Register Now';
                 btn.disabled = false;
             }
         });

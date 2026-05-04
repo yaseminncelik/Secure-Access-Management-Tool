@@ -18,8 +18,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * UserServiceImpl - UserService'in implementation'ı (Polymorphism)
- * Tüm business logic burada yer alır
+ * UserServiceImpl - UserService'in implementation'ı.
+ * NDP Notu: Abstraction (Soyutlama) prensibi, UserService arayüzü sayesinde
+ * iş mantığının gizlenmesi ve bağımlılıkların yönetilmesiyle uygulanmıştır.
  */
 @Service
 @RequiredArgsConstructor

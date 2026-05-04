@@ -100,6 +100,7 @@
             margin-bottom: 0.5rem;
             background: linear-gradient(to right, #60a5fa, #a78bfa);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -220,6 +221,28 @@
             opacity: 0.5;
         }
 
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+                height: auto;
+            }
+            .main-wrapper {
+                margin-top: 140px;
+                padding: 1rem;
+            }
+            .header h1 { font-size: 1.5rem; }
+            .apps-grid {
+                grid-template-columns: 1fr;
+            }
+            .user-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -332,7 +355,7 @@
                 const response = await fetch('/api/redirect/url', {
                     method: 'POST',
                     headers: headers,
-                    body: JSON.stringify({ targetUrl: url, httpMethod: method || 'GET' })
+                    body: JSON.stringify({ url: url, httpMethod: method || 'GET' })
                 });
 
                 const data = await response.json();

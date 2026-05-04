@@ -3,10 +3,10 @@ package com.secureaccess.security;
 import com.secureaccess.entity.User;
 
 /**
- * AbstractAuthenticationProvider - Authentication ve Authorization'ı sağlayan
- * abstract sınıf
- * OOP Prensipleri: Abstraction, Inheritance
- * Design Pattern: Template Method Pattern
+ * AbstractAuthenticationProvider - Güvenlik işlemlerinin temel yapısı.
+ * NDP Notu: Abstraction (Soyutlama) ve Inheritance (Kalıtım). 
+ * Bu sınıf abstract olarak tanımlanmış ve temel iskeleti belirlemiştir.
+ * Alt sınıflar bu metotları doldurmak zorundadır.
  */
 public abstract class AbstractAuthenticationProvider {
 

@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * User Entity - BaseEntity'den türer (Inheritance)
- * OOP Prensipleri: Encapsulation (private fields), Inheritance
+ * User Entity - Kullanıcı bilgilerini tutar.
+ * NDP Notu: Encapsulation (Kapsülleme) - private fieldlar ve getter/setterlar ile veriye kontrollü erişim.
  */
 @Entity
 @Table(name = "users")

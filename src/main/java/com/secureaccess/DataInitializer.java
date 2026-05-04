@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * DataInitializer - Application başladığında demo veri oluştur
+ * DataInitializer - Uygulama başladığında örnek verileri oluşturur.
  */
 @Configuration
 @RequiredArgsConstructor
@@ -98,15 +98,11 @@ public class DataInitializer {
                 System.out.println("✓ user2 için whitelist URL'leri oluşturuldu");
             }
 
-            System.out.println("\n========== DEMO KULLANICILAR ==========");
-            System.out.println("Admin: admin / password");
-            System.out.println("User1: user1 / password123");
-            System.out.println("User2: user2 / password456");
-            System.out.println("\n========== ENDPOINTS ==========");
-            System.out.println("1. Login: POST /api/auth/login");
-            System.out.println("2. Redirect: POST /api/redirect/url");
-            System.out.println("3. Whitelist Yönetimi: /api/whitelist/*");
-            System.out.println("4. H2 Console: http://localhost:8080/h2-console");
+            System.out.println("\n========== SECURE ACCESS SYSTEM READY ==========");
+            System.out.println("1. Web Interface: http://localhost:8080/login");
+            System.out.println("2. API Documentation: /api/*");
+            System.out.println("3. Database Console: /h2-console");
+            System.out.println("================================================\n");
         };
     }
 }

@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * RedirectController - Firewall/Redirect servisi
- * OOP Prensipleri: Encapsulation, Abstraction
- * Kullanıcılar URL'i bu endpoint'e göndererek redirect sevisi kullanabilir
+ * RedirectController - Erişim kontrolü yapan ana modül.
+ * NDP Notu: Encapsulation (Kapsülleme) - DTO kullanımıyla veriler kontrollü bir şekilde paketlenip aktarılır.
  */
 @RestController
 @RequestMapping("/api/redirect")
@@ -22,11 +21,14 @@ public class RedirectController {
 
     private final JwtAuthenticationProvider authProvider;
     private final AccessLogService accessLogService;
+    private final com.secureaccess.repository.UserRepository userRepository;
 
     public RedirectController(JwtAuthenticationProvider authProvider,
-            AccessLogService accessLogService) {
+            AccessLogService accessLogService,
+            com.secureaccess.repository.UserRepository userRepository) {
         this.authProvider = authProvider;
         this.accessLogService = accessLogService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -68,16 +70,24 @@ public class RedirectController {
                     .body(new RedirectResponseDTO(false, "Token süresi dolmuş", null));
         }
 
+        // --- YENİ: Admin simülasyon mantığı ---
+        User targetUser = user;
+        Long testUserId = redirectRequest.getUserId();
+        if (user.getRole().toString().equals("ADMIN") && testUserId != null) {
+            targetUser = userRepository.findById(testUserId).orElse(user);
+        }
+        // ------------------------------------
+
         // Authorization kontrol et (whitelist)
-        if (!authProvider.authorize(user, url, httpMethod)) {
-            logAccessAttempt(user, url, httpMethod, AccessStatus.DENIED,
+        if (!authProvider.authorize(targetUser, url, httpMethod)) {
+            logAccessAttempt(targetUser, url, httpMethod, AccessStatus.DENIED,
                     "Bu URL'e erişim izniniz yok", ipAddress);
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new RedirectResponseDTO(false, "Bu URL'e erişim izniniz yok", null));
         }
 
         // Erişime izin ver ve log kaydı oluştur
-        logAccessAttempt(user, url, httpMethod, AccessStatus.ALLOWED,
+        logAccessAttempt(targetUser, url, httpMethod, AccessStatus.ALLOWED,
                 "Erişime izin verildi", ipAddress);
 
         return ResponseEntity.ok()

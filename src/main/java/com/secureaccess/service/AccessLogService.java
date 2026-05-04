@@ -28,8 +28,5 @@ public interface AccessLogService {
      */
     List<AccessLog> getRecentAccessLogs(User user);
 
-    /**
-     * Tüm access log'ları getir
-     */
     List<AccessLog> getAllAccessLogs();
 }

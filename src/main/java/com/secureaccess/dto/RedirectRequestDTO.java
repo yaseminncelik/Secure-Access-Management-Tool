@@ -15,6 +15,6 @@ import lombok.Setter;
 public class RedirectRequestDTO {
 
     private String url;
-
     private String httpMethod; // Optional, default: GET
+    private Long userId; // Optional, only for ADMIN test usage
 }

@@ -6,8 +6,9 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * BaseEntity - Tüm Entity'lerin türemesi gereken parent class (Inheritance)
- * OOP Prensipleri: Encapsulation (private fields), Inheritance
+ * BaseEntity - Ortak özellikleri barındıran temel sınıf.
+ * NDP Notu: Inheritance (Kalıtım) - Diğer tüm entity sınıfları (User, Whitelist vb.)
+ * bu sınıftan türeyerek id, createdAt gibi özellikleri miras alır.
  */
 @Getter
 @Setter

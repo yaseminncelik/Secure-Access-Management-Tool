@@ -4,26 +4,20 @@ import com.secureaccess.entity.User;
 import com.secureaccess.repository.URLWhitelistRepository;
 import com.secureaccess.repository.UserRepository;
 import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 
 /**
- * JwtAuthenticationProvider - JWT tabanlı authentication ve authorization
- * OOP Prensipleri: Inheritance, Polymorphism
- * Concrete implementation of AbstractAuthenticationProvider
+ * JwtAuthenticationProvider - JWT token doğrulama ve yetkilendirme.
+ * NDP Notu: Abstraction (Soyutlama) prensibi burada güvenlik mantığının 
+ * tek bir sınıfta toplanmasıyla sağlanmıştır.
  */
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationProvider extends AbstractAuthenticationProvider {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
     private final URLWhitelistRepository whitelistRepository;
-
-    public JwtAuthenticationProvider(JwtTokenProvider jwtTokenProvider,
-            UserRepository userRepository,
-            URLWhitelistRepository whitelistRepository) {
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.userRepository = userRepository;
-        this.whitelistRepository = whitelistRepository;
-    }
 
     /**
      * Token'ı doğrula ve User objesini döndür

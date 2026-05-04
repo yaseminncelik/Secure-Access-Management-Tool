@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firewall Test - Secure Access</title>
+    <title>Access Policy Simulator - Secure Access</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -219,31 +219,51 @@
         
         .info-card li::marker { color: var(--accent-color); }
 
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+                height: auto;
+                position: relative;
+            }
+            .main-wrapper {
+                margin-top: 20px;
+                padding: 1rem;
+            }
+            .container {
+                padding: 1.5rem;
+            }
+            h1 { font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
     <div class="navbar">
         <a href="/login">Login</a>
         <a href="/users">Users</a>
-        <a href="/firewall-test" class="active">Firewall Test</a>
+        <a href="/firewall-test" class="active">Policy Simulator</a>
     </div>
 
     <div class="main-wrapper">
         <div class="container">
-            <h1>Firewall Access Test</h1>
-            <p class="subtitle">Validate URLs against secure policies using your token</p>
+            <h1>Access Policy Simulator</h1>
+            <p class="subtitle">Simulate and validate access rules for any user</p>
 
             <div id="resultMessage" class="result-message"></div>
 
             <form id="firewallForm">
                 <div class="form-group">
-                    <label for="targetUrl">Target URL</label>
-                    <input type="url" id="targetUrl" name="targetUrl" placeholder="https://api.example.com/data" required>
+                    <label for="userSelect">Test As User (Admin Only)</label>
+                    <select id="userSelect" style="width:100%; padding:0.85rem; background:rgba(15, 23, 42, 0.5); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary);">
+                        <option value="">-- Myself (Current Admin) --</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="token">Authorization Token (JWT)</label>
-                    <textarea id="token" name="token" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required></textarea>
+                    <label for="targetUrl">Target URL</label>
+                    <input type="url" id="targetUrl" name="targetUrl" placeholder="https://api.example.com/data" required>
                 </div>
 
                 <button type="submit">
@@ -255,10 +275,8 @@
             <div class="info-card">
                 <h3><svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg> Quick Guide</h3>
                 <ol>
-                    <li>Authenticate via the <strong>Login</strong> page to obtain your JWT.</li>
                     <li>Enter the complete endpoint URL you wish to access.</li>
-                    <li>Paste your token exactly as provided.</li>
-                    <li>Click test to verify your current firewall access rules.</li>
+                    <li>Click test to verify the access rules for the selected user.</li>
                 </ol>
             </div>
         </div>
@@ -276,18 +294,38 @@
             }
 
             const storedToken = sessionStorage.getItem('token');
-            if (storedToken) {
-                document.getElementById('token').value = storedToken;
-                const tokenLabel = document.querySelector('label[for="token"]');
-                tokenLabel.innerHTML += ' <span style="color:var(--success-text);font-size:0.75rem;font-weight:normal;margin-left:8px;">(Oturumunuzdan otomatik dolduruldu)</span>';
-            }
+            // Load users for dropdown
+            fetch('/api/users', {
+                headers: { 'Authorization': storedToken.startsWith('Bearer ') ? storedToken : 'Bearer ' + storedToken }
+            })
+            .then(res => res.json())
+            .then(response => {
+                const select = document.getElementById('userSelect');
+                // Backend Map<String, Object> dönderdiği için response.data'yı kullanmalıyız
+                const users = response.data || [];
+                
+                users.forEach(u => {
+                    // Role bilgisini güvenli bir şekilde alalım
+                    let userRole = '';
+                    if (typeof u.role === 'string') userRole = u.role.toUpperCase();
+                    else if (u.role && u.role.name) userRole = u.role.name.toUpperCase();
+
+                    if (userRole !== 'ADMIN') {
+                        const opt = document.createElement('option');
+                        opt.value = u.id;
+                        opt.textContent = `${u.username} (${u.email})`;
+                        select.appendChild(opt);
+                    }
+                });
+            })
+            .catch(err => console.error('Error loading users:', err));
         });
 
         document.getElementById('firewallForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const targetUrl = document.getElementById('targetUrl').value;
-            const token = document.getElementById('token').value.trim();
+            const token = sessionStorage.getItem('token'); // Oturumdan otomatik al
             const resultDiv = document.getElementById('resultMessage');
             const submitBtn = this.querySelector('button');
 
@@ -300,6 +338,7 @@
             resultDiv.className = 'result-message';
 
             try {
+                const selectedUserId = document.getElementById('userSelect').value;
                 const response = await fetch('/api/redirect/url', {
                     method: 'POST',
                     headers: {
@@ -307,8 +346,9 @@
                         'Authorization': token.startsWith('Bearer ') ? token : 'Bearer ' + token
                     },
                     body: JSON.stringify({
-                        targetUrl: targetUrl,
-                        httpMethod: 'GET'
+                        url: targetUrl,
+                        httpMethod: 'GET',
+                        userId: selectedUserId ? parseInt(selectedUserId) : null
                     })
                 });
 
@@ -323,7 +363,7 @@
                             Access Granted
                         </strong>
                         <div style="font-family:monospace;font-size:0.85rem;color:var(--text-secondary)">
-                            Status: <span style="color:var(--success-text)">${data.status}</span><br>
+                            Status: <span style="color:var(--success-text)">Success</span><br>
                             Message: ${data.message}<br>
                             Redirect: <a href="${data.redirectUrl}" target="_blank" style="color:var(--accent-color)">${data.redirectUrl || 'N/A'}</a>
                         </div>

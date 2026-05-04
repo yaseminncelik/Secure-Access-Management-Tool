@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * UserController - User CRUD işlemleri
- * OOP Prensipleri: Abstraction (iş mantığı Service'de), Encapsulation
+ * UserController - Kullanıcı yönetimi (Ekleme, Silme, Listeleme).
+ * NDP Notu: Abstraction (Soyutlama) - İş mantığı Service katmanındaki arayüzler arkasında gizlenmiştir.
  */
 @RestController
 @RequestMapping("/api/users")

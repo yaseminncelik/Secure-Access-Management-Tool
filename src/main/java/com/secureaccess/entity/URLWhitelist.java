@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * URLWhitelist Entity - Admin tarafından tanımlanan izinli URL'leri tutmak için
- * OOP Prensipleri: Encapsulation, Inheritance (BaseEntity'den türer)
+ * URLWhitelist Entity - İzinli URL bilgilerini tutar.
+ * NDP Notu: Encapsulation (Kapsülleme) - Erişim kısıtlamaları burada uygulanmıştır.
  */
 @Entity
 @Table(name = "url_whitelist")
