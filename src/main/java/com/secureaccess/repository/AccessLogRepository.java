@@ -20,7 +20,12 @@ public interface AccessLogRepository extends JpaRepository<AccessLog, Long> {
     List<AccessLog> findByUser(User user);
 
     /**
-     * Belirli bir kullanıcının son 100 access log'unu getir (sıralı)
+     * Belirli bir kullanıcının son access log'larını getir (sıralı)
      */
     List<AccessLog> findByUserOrderByCreatedAtDesc(User user);
+
+    /**
+     * Belirli bir kullanıcıya ait access log'larını ID'ye göre getir (sıralı)
+     */
+    List<AccessLog> findByUserIdOrderByCreatedAtDesc(Long userId);
 }

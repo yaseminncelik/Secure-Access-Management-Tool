@@ -39,6 +39,11 @@ public class AccessLogServiceImpl implements AccessLogService {
     }
 
     @Override
+    public List<AccessLog> getAccessLogsByUserId(Long userId) {
+        return accessLogRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    @Override
     public List<AccessLog> getAllAccessLogs() {
         return accessLogRepository.findAll();
     }

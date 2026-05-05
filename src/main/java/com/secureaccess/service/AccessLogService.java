@@ -24,9 +24,17 @@ public interface AccessLogService {
     List<AccessLog> getAccessLogsByUser(User user);
 
     /**
-     * Belirli bir kullanıcının son 100 access log'unu getir
+     * Belirli bir kullanıcının son access log'larını getir
      */
     List<AccessLog> getRecentAccessLogs(User user);
 
+    /**
+     * Belirli bir kullanıcının access log'larını ID'ye göre getir
+     */
+    List<AccessLog> getAccessLogsByUserId(Long userId);
+
+    /**
+     * Tüm access log'larını getir
+     */
     List<AccessLog> getAllAccessLogs();
 }
