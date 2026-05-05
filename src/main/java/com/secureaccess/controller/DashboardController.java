@@ -32,6 +32,11 @@ public class DashboardController {
     public String registerPage() {
         return "register";
     }
+
+    @GetMapping("/forgot-password")
+    public String forgotPasswordPage() {
+        return "forgot-password";
+    }
     
     @GetMapping("/users")
     public String usersPage(Model model) {

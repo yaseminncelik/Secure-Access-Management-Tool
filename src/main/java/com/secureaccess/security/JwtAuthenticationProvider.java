@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * JwtAuthenticationProvider - JWT token doğrulama ve yetkilendirme.
- * NDP Notu: Abstraction (Soyutlama) prensibi burada güvenlik mantığının 
+ * NDP Notu: Abstraction (Soyutlama) prensibi burada güvenlik mantığının
  * tek bir sınıfta toplanmasıyla sağlanmıştır.
  */
 @Component
@@ -44,9 +44,46 @@ public class JwtAuthenticationProvider extends AbstractAuthenticationProvider {
             return true;
         }
 
-        // Kullanıcı tarafından tanımlanan whitelist kontrol et
-        return whitelistRepository.existsByUserAndUrlAndHttpMethod(
-                user, requestedUrl, httpMethod);
+        // URL'leri normalize et ve karşılaştır
+        String normalizedRequestedUrl = normalizeUrl(requestedUrl);
+
+        // Tüm whitelist URL'lerini getir ve normalize ederek karşılaştır
+        var whitelistUrls = whitelistRepository.findByUserAndIsActiveTrue(user);
+        return whitelistUrls.stream()
+                .anyMatch(whitelist -> normalizeUrl(whitelist.getUrl()).equals(normalizedRequestedUrl) &&
+                        whitelist.getHttpMethod().equals(httpMethod));
+    }
+
+    /**
+     * URL'i normalize et (www'siz, trailing slash'siz, lowercase domain)
+     * Örnek: https://www.github.com/ -> https://github.com
+     */
+    private String normalizeUrl(String url) {
+        if (url == null || url.isEmpty()) {
+            return url;
+        }
+
+        try {
+            java.net.URL parsedUrl = new java.net.URL(url);
+            String protocol = parsedUrl.getProtocol();
+            String host = parsedUrl.getHost().toLowerCase();
+            String path = parsedUrl.getPath();
+
+            // www. ön ekini kaldır (sadece subdomain ise)
+            if (host.startsWith("www.")) {
+                host = host.substring(4);
+            }
+
+            // Trailing slash'i kaldır (sadece path'i yoksa)
+            if (path.equals("/")) {
+                path = "";
+            }
+
+            return protocol + "://" + host + path;
+        } catch (java.net.MalformedURLException e) {
+            // URL geçersizse, olduğu gibi döndür
+            return url;
+        }
     }
 
     /**

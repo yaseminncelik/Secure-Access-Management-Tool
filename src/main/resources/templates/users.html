@@ -399,7 +399,7 @@
                     <input type="email" id="formEmail" required>
                 </div>
                 <div class="form-group" id="passwordGroup">
-                    <label>Password</label>
+                    <label id="passwordLabel">Password</label>
                     <input type="password" id="formPassword" required>
                 </div>
                 <div class="form-group">
@@ -539,6 +539,7 @@
             currentUserId = null;
             document.getElementById('modalTitle').textContent = 'Add New User';
             document.getElementById('userForm').reset();
+            document.getElementById('passwordLabel').textContent = 'Password';
             document.getElementById('passwordGroup').style.display = 'block';
             document.getElementById('formPassword').required = true;
             document.getElementById('userModal').style.display = 'flex';
@@ -565,7 +566,8 @@
                     document.getElementById('formRole').value = user.role;
                     document.getElementById('formPassword').value = '';
                     document.getElementById('formPassword').required = false;
-                    document.getElementById('passwordGroup').style.display = 'none'; // Optional: hide password field on edit if backend doesn't support updating it this way easily
+                    document.getElementById('passwordLabel').textContent = 'New Password (Leave blank to keep current)';
+                    document.getElementById('passwordGroup').style.display = 'block';
                     document.getElementById('userModal').style.display = 'flex';
                 });
         }

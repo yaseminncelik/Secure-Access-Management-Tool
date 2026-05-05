@@ -152,6 +152,19 @@ public class UserServiceImpl implements UserService {
         return convertToDTO(user);
     }
 
+
+    @Override
+    @Transactional
+    public void resetPassword(String username, String email, String newPassword) {
+        User user = userRepository.findByUsernameAndEmail(username, email)
+                .orElseThrow(() -> new InvalidCredentialsException("Kullanıcı adı veya e-posta hatalı"));
+
+        validatePassword(newPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+
     /**
      * Entity'yi DTO'ya çevir (Encapsulation - sensitive bilgiler dışarı çıkmaz)
      */

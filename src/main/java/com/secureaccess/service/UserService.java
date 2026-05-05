@@ -42,4 +42,9 @@ public interface UserService {
      * Login işlemi
      */
     UserResponseDTO login(LoginRequestDTO loginRequest);
+
+    /**
+     * Şifre sıfırlama işlemi
+     */
+    void resetPassword(String username, String email, String newPassword);
 }
