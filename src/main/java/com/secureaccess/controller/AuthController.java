@@ -3,8 +3,12 @@ package com.secureaccess.controller;
 import com.secureaccess.dto.LoginRequestDTO;
 import com.secureaccess.dto.LoginResponseDTO;
 import com.secureaccess.dto.UserResponseDTO;
+import com.secureaccess.entity.AccessStatus;
+import com.secureaccess.entity.User;
 import com.secureaccess.security.JwtTokenProvider;
+import com.secureaccess.service.AccessLogService;
 import com.secureaccess.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +29,8 @@ public class AuthController {
 
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AccessLogService accessLogService;
+    private final HttpServletRequest request;
 
     /**
      * Login Endpoint
@@ -33,19 +39,30 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
+        String ipAddress = getClientIpAddress(request);
         try {
-            UserResponseDTO user = userService.login(loginRequest);
+            UserResponseDTO userResponse = userService.login(loginRequest);
+            String token = jwtTokenProvider.generateToken(userResponse.getUsername());
 
-            // JWT Token oluştur
-            String token = jwtTokenProvider.generateToken(user.getUsername());
+
+            userService.findByUsername(userResponse.getUsername()).ifPresent(userEntity -> {
+                accessLogService.createAccessLog(userEntity, "/api/auth/login", "POST",
+                        AccessStatus.ALLOWED, "Login successful", ipAddress);
+            });
 
             LoginResponseDTO response = new LoginResponseDTO(
                     "Login successful",
-                    user,
+                    userResponse,
                     true,
                     token);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+
+            userService.findByUsername(loginRequest.getUsername()).ifPresent(user -> {
+                accessLogService.createAccessLog(user, "/api/auth/login", "POST",
+                        AccessStatus.DENIED, "Login failed: " + e.getMessage(), ipAddress);
+            });
+
             LoginResponseDTO response = new LoginResponseDTO(
                     e.getMessage(),
                     null,
@@ -53,6 +70,14 @@ public class AuthController {
                     null);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
+    }
+
+    private String getClientIpAddress(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0];
+        }
+        return request.getRemoteAddr();
     }
 
     @PostMapping("/forgot-password")

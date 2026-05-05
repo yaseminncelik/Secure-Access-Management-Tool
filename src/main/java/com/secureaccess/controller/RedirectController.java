@@ -46,7 +46,6 @@ public class RedirectController {
         String url = redirectRequest.getUrl();
         String httpMethod = redirectRequest.getHttpMethod() != null ? redirectRequest.getHttpMethod() : "GET";
 
-        // Token'ı doğrula ve kullanıcıyı al
         if (token == null) {
             logAccessAttempt(null, url, httpMethod, AccessStatus.INVALID_TOKEN,
                     "Token sağlanmadı", ipAddress);
@@ -62,7 +61,6 @@ public class RedirectController {
                     .body(new RedirectResponseDTO(false, "Geçersiz token", null));
         }
 
-        // Token'ın süresi dolmuş mı kontrol et
         if (authProvider.isTokenExpired(token)) {
             logAccessAttempt(user, url, httpMethod, AccessStatus.EXPIRED_TOKEN,
                     "Token süresi dolmuş", ipAddress);
@@ -70,15 +68,12 @@ public class RedirectController {
                     .body(new RedirectResponseDTO(false, "Token süresi dolmuş", null));
         }
 
-        // --- YENİ: Admin simülasyon mantığı ---
         User targetUser = user;
         Long testUserId = redirectRequest.getUserId();
         if (user.getRole().toString().equals("ADMIN") && testUserId != null) {
             targetUser = userRepository.findById(testUserId).orElse(user);
         }
-        // ------------------------------------
 
-        // Authorization kontrol et (whitelist)
         if (!authProvider.authorize(targetUser, url, httpMethod)) {
             logAccessAttempt(targetUser, url, httpMethod, AccessStatus.DENIED,
                     "Bu URL'e erişim izniniz yok", ipAddress);
@@ -86,7 +81,6 @@ public class RedirectController {
                     .body(new RedirectResponseDTO(false, "Bu URL'e erişim izniniz yok", null));
         }
 
-        // Erişime izin ver ve log kaydı oluştur
         logAccessAttempt(targetUser, url, httpMethod, AccessStatus.ALLOWED,
                 "Erişime izin verildi", ipAddress);
 
@@ -115,13 +109,8 @@ public class RedirectController {
         return request.getRemoteAddr();
     }
 
-    /**
-     * Access log kaydı oluştur
-     */
     private void logAccessAttempt(User user, String url, String httpMethod,
             AccessStatus status, String reason, String ipAddress) {
-        // Eğer user null ise, log oluşturamayız (DB'de user_id zorunlu)
-        // Gerçek uygulamada, başarısız denemeler için farklı bir tablo olabilir
         if (user != null) {
             accessLogService.createAccessLog(user, url, httpMethod, status, reason, ipAddress);
         }

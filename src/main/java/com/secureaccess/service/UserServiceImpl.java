@@ -55,7 +55,6 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Admin kullanıcısının adı sadece 'admin' olabilir");
         }
 
-        // Kullanıcı zaten var mı kontrol et
         if (userRepository.findByUsername(requestDTO.getUsername()).isPresent()) {
             throw new UserAlreadyExistsException("Username already exists: " + requestDTO.getUsername());
         }
@@ -64,7 +63,6 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException("Email already exists: " + requestDTO.getEmail());
         }
 
-        // Yeni kullanıcı oluştur (Şifre encode edilmiş)
         User user = new User(
                 requestDTO.getUsername(),
                 passwordEncoder.encode(requestDTO.getPassword()),
@@ -84,14 +82,12 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Admin kullanıcısının adı sadece 'admin' olabilir");
         }
 
-        // Username kontrol (başka birinin username'ini alamamak için)
         if (!user.getUsername().equals(requestDTO.getUsername())) {
             if (userRepository.findByUsername(requestDTO.getUsername()).isPresent()) {
                 throw new UserAlreadyExistsException("Username already exists: " + requestDTO.getUsername());
             }
         }
 
-        // Email kontrol (başka birinin email'ini alamamak için)
         if (!user.getEmail().equals(requestDTO.getEmail())) {
             if (userRepository.findByEmail(requestDTO.getEmail()).isPresent()) {
                 throw new UserAlreadyExistsException("Email already exists: " + requestDTO.getEmail());
@@ -154,7 +150,6 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    @Transactional
     public void resetPassword(String username, String email, String newPassword) {
         User user = userRepository.findByUsernameAndEmail(username, email)
                 .orElseThrow(() -> new InvalidCredentialsException("Kullanıcı adı veya e-posta hatalı"));
@@ -162,6 +157,12 @@ public class UserServiceImpl implements UserService {
         validatePassword(newPassword);
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
 

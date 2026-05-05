@@ -3,9 +3,11 @@ package com.secureaccess.service;
 import com.secureaccess.dto.LoginRequestDTO;
 import com.secureaccess.dto.UserRequestDTO;
 import com.secureaccess.dto.UserResponseDTO;
+import com.secureaccess.entity.User;
 import org.springframework.lang.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * UserService Interface - Polymorphism ve Abstraction
@@ -47,4 +49,9 @@ public interface UserService {
      * Şifre sıfırlama işlemi
      */
     void resetPassword(String username, String email, String newPassword);
+
+    /**
+     * Kullanıcı adıyla kullanıcı getir (Entity döner - internal kullanım için)
+     */
+    Optional<User> findByUsername(String username);
 }
