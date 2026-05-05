@@ -4,7 +4,6 @@ import com.secureaccess.dto.LoginRequestDTO;
 import com.secureaccess.dto.LoginResponseDTO;
 import com.secureaccess.dto.UserResponseDTO;
 import com.secureaccess.entity.AccessStatus;
-import com.secureaccess.entity.User;
 import com.secureaccess.security.JwtTokenProvider;
 import com.secureaccess.service.AccessLogService;
 import com.secureaccess.service.UserService;
